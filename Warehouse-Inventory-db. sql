@@ -1,0 +1,79 @@
+-- 1. TABEL SUPPLIER
+CREATE TABLE suppliers (
+    supplier_id INT AUTO_INCREMENT PRIMARY KEY,
+    nama_supplier VARCHAR(100) NOT NULL,
+    kontak VARCHAR(50),
+    alamat TEXT
+);
+
+-- 2. TABEL KATEGORI
+CREATE TABLE categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    nama_kategori VARCHAR(50) NOT NULL,
+    deskripsi TEXT
+);
+
+-- 3. TABEL BARANG
+CREATE TABLE products (
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT,
+    supplier_id INT,
+    nama_barang VARCHAR(100) NOT NULL,
+    harga_beli DECIMAL(12, 2) NOT NULL,
+    harga_jual DECIMAL(12, 2) NOT NULL,
+    stok_gudang INT DEFAULT 0,
+    satuan VARCHAR(20) DEFAULT 'Pcs',
+    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE SET NULL
+);
+
+-- 4. TABEL TRANSAKSI MASUK
+CREATE TABLE incoming_transactions (
+    incoming_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT,
+    jumlah_masuk INT NOT NULL,
+    tanggal_masuk TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- <- SISIHKAN INI DI SINI
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+);
+
+-- 5. TABEL TRANSAKSI KELUAR
+CREATE TABLE outgoing_transactions (
+    outgoing_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT,
+    jumlah_keluar INT NOT NULL,
+    total_harga DECIMAL(12, 2) NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+);
+
+-- TRIGGER BARANG MASUK
+CREATE TRIGGER after_incoming_insert
+AFTER INSERT ON incoming_transactions
+FOR EACH ROW
+UPDATE products 
+SET stok_gudang = stok_gudang + NEW.jumlah_masuk
+WHERE product_id = NEW.product_id;
+
+-- TRIGGER BARANG KELUAR
+CREATE TRIGGER after_outgoing_insert
+AFTER INSERT ON outgoing_transactions
+FOR EACH ROW
+UPDATE products 
+SET stok_gudang = stok_gudang - NEW.jumlah_keluar
+WHERE product_id = NEW.product_id;
+
+-- ISI DATA DUMMY
+INSERT INTO suppliers (nama_supplier, kontak, alamat) VALUES
+('PT Sumber Sembako Mapan', '08123456789', 'Bandung Barat'),
+('Distributor Elektronik Jaya', '08987654321', 'Kota Bandung');
+
+INSERT INTO categories (nama_kategori, deskripsi) VALUES
+('Sembako', 'Kebutuhan pokok'),
+('Elektronik', 'Peralatan elektronik');
+
+INSERT INTO products (category_id, supplier_id, nama_barang, harga_beli, harga_jual, stok_gudang, satuan) VALUES
+(1, 1, 'Minyak Goreng 2L', 28000.00, 32000.00, 0, 'Pouch'),
+(2, 2, 'Lampu LED 12W', 15000.00, 25000.00, 0, 'Pcs');
+
+-- SIMULASI TRANSAKSI (Memicu Trigger Otomatis)
+INSERT INTO incoming_transactions (product_id, jumlah_masuk) VALUES (1, 100), (2, 50);
+INSERT INTO outgoing_transactions (product_id, jumlah_keluar, total_harga) VALUES (1, 10, 320000.00);
