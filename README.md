@@ -1,6 +1,3 @@
-# wholesale-warehouse-inventory-database
-​A comprehensive, production-ready MySQL database template for wholesale warehouse management. Features automated inventory tracking via triggers, dynamic total calculations, and relational constraints
-
 # Wholesale Warehouse Inventory Database System (MySQL v2)
 
 A robust, relational, and production-ready MySQL database schema designed for wholesale warehouse operations. It comes equipped with automation features like database triggers for stock management and data consistency constraints, making it highly suitable for academic projects, portfolios, or small business inventory backends.
