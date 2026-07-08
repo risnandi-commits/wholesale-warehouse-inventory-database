@@ -77,3 +77,57 @@ INSERT INTO products (category_id, supplier_id, nama_barang, harga_beli, harga_j
 -- SIMULASI TRANSAKSI (Memicu Trigger Otomatis)
 INSERT INTO incoming_transactions (product_id, jumlah_masuk) VALUES (1, 100), (2, 50);
 INSERT INTO outgoing_transactions (product_id, jumlah_keluar, total_harga) VALUES (1, 10, 320000.00);
+
+-- -------------------------------------------------------------------------
+-- A. MAKING VIEWS (Tabel Laporan Siap Pakai)
+-- -------------------------------------------------------------------------
+
+-- 1. View untuk Laporan Keuntungan Ringkas
+CREATE VIEW v_neraca_keuntungan AS
+SELECT 
+    p.nama_barang AS produk,
+    SUM(o.jumlah_keluar) AS total_terjual,
+    SUM(o.total_harga) AS omset,
+    (SUM(o.total_harga) - SUM(o.jumlah_keluar * p.harga_beli)) AS profit_bersih
+FROM outgoing_transactions o
+JOIN products p ON o.product_id = p.product_id
+GROUP BY p.product_id;
+
+-- 2. View untuk Alert Stok di Bawah 20 Pcs
+CREATE VIEW v_peringatan_stok AS
+SELECT nama_barang, stok_gudang, satuan 
+FROM products 
+WHERE stok_gudang < 20;
+
+
+-- -------------------------------------------------------------------------
+-- B. MAKING STORED PROCEDURES (Otomatisasi Input Transaksi)
+-- -------------------------------------------------------------------------
+
+-- Procedure untuk mencatat barang masuk dengan mudah
+CREATE PROCEDURE sp_restock_barang(
+    IN p_product_id INT, 
+    IN p_jumlah INT
+)
+BEGIN
+    INSERT INTO incoming_transactions (product_id, jumlah_masuk) 
+    VALUES (p_product_id, p_jumlah);
+END;
+
+-- Procedure untuk mencatat penjualan grosir dengan mudah
+CREATE PROCEDURE sp_penjualan_grosir(
+    IN p_product_id INT, 
+    IN p_jumlah INT,
+    IN p_total_harga DECIMAL(12,2)
+)
+BEGIN
+    INSERT INTO outgoing_transactions (product_id, jumlah_keluar, total_harga) 
+    VALUES (p_product_id, p_jumlah, p_total_harga);
+END;
+
+
+-- -------------------------------------------------------------------------
+-- C. DATABASE INDEXING (Optimasi Speed Query)
+-- -------------------------------------------------------------------------
+CREATE INDEX idx_nama_barang ON products(nama_barang);
+
