@@ -131,3 +131,20 @@ END;
 -- -------------------------------------------------------------------------
 CREATE INDEX idx_nama_barang ON products(nama_barang);
 
+
+
+-- =========================================================================
+-- CONTOH QUERY UNTUK PENGUJIAN SISTEM (TESTING QUERIES)
+-- =========================================================================
+
+-- 1. Menguji VIEW Laporan Keuntungan Ringkas
+SELECT * FROM v_neraca_keuntungan;
+
+-- 2. Menguji VIEW Peringatan Stok Gudang
+SELECT * FROM v_peringatan_stok;
+
+-- 3. Menguji Fungsi Tambah Stok (Stored Procedure)
+CALL sp_restock_barang(1, 50);
+
+-- 4. Mengecek Perubahan Stok Setelah Procedure Dijalankan
+SELECT nama_barang, stok_gudang FROM products WHERE product_id = 1;
