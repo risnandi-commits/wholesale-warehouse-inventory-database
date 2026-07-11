@@ -22,3 +22,25 @@ The database consists of 5 tightly-coupled relational tables:
    ```sql
    CREATE DATABASE db_gudang_grosir;
    USE db_gudang_grosir;
+
+---
+
+## Entity-Relationship Diagram (ERD)
+
+[ERD Warehouse Inventory](ERD-warehouse-inventory.png)
+
+### Database Component Breakdown
+
+| Entity | Primary Key | Foreign Key | Description |
+| :--- | :--- | :--- | :--- |
+| **Suppliers** | `id_suppliers` | None | Stores supplier contact details. |
+| **Categories** | `id_categories` | None | Groups products into specific types. |
+| **Product** | `id_product` | `id_categories`, `id_suppliers` | Core inventory details and stock levels. |
+| **Incoming_transactions** | `id_incoming` | `id_product` | Tracks incoming restock batches. |
+| **Outgoing_transactions** | `id_outgoing` | `id_product` | Tracks sales and outgoing stock. |
+
+### Features Included
+* 🔄 **Automated Inventory Tracking** via MySQL Triggers.
+* 📈 **Real-time Profit & Stock Alerts** via Database Views.
+* ⚡ **Performance Optimization** via Database Indexing.
+
